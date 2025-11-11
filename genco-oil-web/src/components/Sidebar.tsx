@@ -82,7 +82,7 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
-  activeItem = 'dashboard',
+  activeItem: _activeItem = 'dashboard',
   isCollapsed = false,
   onToggle
 }) => {

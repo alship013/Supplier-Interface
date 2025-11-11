@@ -2,9 +2,6 @@ import React from 'react';
 import {
   Bell,
   Search,
-  User,
-  LogOut,
-  Settings,
   Moon,
   Sun
 } from 'lucide-react';

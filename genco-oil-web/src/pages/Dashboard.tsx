@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Users,
   Package,
@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { mockDashboardStats, mockSuppliers } from '@/data/mockData';
 
 const StatCard = ({ title, value, change, changeType, icon, color }: {
@@ -107,7 +106,6 @@ const ActivityItem = ({ activity }: { activity: any }) => {
 
 export const Dashboard: React.FC = () => {
   const stats = mockDashboardStats;
-  const [activeTab, setActiveTab] = useState('overview');
 
   const statCards = [
     {
