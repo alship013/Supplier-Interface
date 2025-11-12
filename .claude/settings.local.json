@@ -7,7 +7,10 @@
       "Bash(npm uninstall:*)",
       "Bash(npx shadcn-ui@latest init:*)",
       "Bash(npx shadcn@latest add:*)",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "Bash(npm run)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run build)"
     ],
     "deny": [],
     "ask": []

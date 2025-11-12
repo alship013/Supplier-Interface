@@ -19,6 +19,12 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Sidebar } from '@/components/Sidebar';
 import SuppliersPage from '@/pages/SuppliersPage';
 import FieldOperationsPage from '@/pages/FieldOperationsPage';
+import ContractsPage from '@/pages/ContractsPage';
+import ProcessingPage from '@/pages/ProcessingPage';
+import CompliancePage from '@/pages/CompliancePage';
+import TradingPage from '@/pages/TradingPage';
+import ReportsPage from '@/pages/ReportsPage';
+import SettingsPage from '@/pages/SettingsPage';
 import { mockDashboardStats } from '@/data/mockData';
 
 const StatCard = ({ title, value, change, changeType, icon, color }: {
@@ -229,7 +235,13 @@ function App() {
             <Routes>
               <Route path="/" element={<DashboardPage />} />
               <Route path="/suppliers" element={<SuppliersPage />} />
+              <Route path="/contracts" element={<ContractsPage />} />
+              <Route path="/processing" element={<ProcessingPage />} />
               <Route path="/field-operations" element={<FieldOperationsPage />} />
+              <Route path="/compliance" element={<CompliancePage />} />
+              <Route path="/trading" element={<TradingPage />} />
+              <Route path="/reports" element={<ReportsPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
             </Routes>
           </main>
         </div>

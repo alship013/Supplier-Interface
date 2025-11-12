@@ -8,7 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { mockSuppliers } from '@/data/mockData';
 import type { Supplier } from '@/types';
-import { Plus, Search, Edit, Eye, MapPin, Mail, Phone, Calendar, TrendingUp } from 'lucide-react';
+import { Plus, Search, Edit, Eye, MapPin, Mail, Phone, Calendar, TrendingUp, FileText, ClipboardList, FileSignature } from 'lucide-react';
+import SupplierSurveyForm from '@/components/SupplierSurveyForm';
+import ContractCreationForm from '@/components/ContractCreationForm';
+import { mockContracts } from '@/data/mockContracts';
+import { ContractStatus, ContractType } from '@/types/contract';
 
 const SuppliersPage: React.FC = () => {
   const [suppliers] = useState<Supplier[]>(mockSuppliers);
@@ -17,6 +21,9 @@ const SuppliersPage: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive' | 'pending'>('all');
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isSurveyFormOpen, setIsSurveyFormOpen] = useState(false);
+  const [isContractFormOpen, setIsContractFormOpen] = useState(false);
+  const [selectedSupplierForContract, setSelectedSupplierForContract] = useState<Supplier | null>(null);
 
   const filteredSuppliers = suppliers.filter(supplier => {
     const matchesSearch = supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -38,6 +45,26 @@ const SuppliersPage: React.FC = () => {
 
   const getTypeBadge = (type: string) => {
     return <Badge variant={type === 'supplier' ? 'default' : 'secondary'}>{type}</Badge>;
+  };
+
+  const getContractStatusBadge = (status: ContractStatus) => {
+    const statusConfig = {
+      [ContractStatus.DRAFT]: { variant: 'secondary' as const, color: 'text-gray-600' },
+      [ContractStatus.PENDING_REVIEW]: { variant: 'outline' as const, color: 'text-yellow-600' },
+      [ContractStatus.PENDING_SIGNATURE]: { variant: 'outline' as const, color: 'text-orange-600' },
+      [ContractStatus.ACTIVE]: { variant: 'default' as const, color: 'text-green-600' },
+      [ContractStatus.SUSPENDED]: { variant: 'secondary' as const, color: 'text-red-600' },
+      [ContractStatus.EXPIRED]: { variant: 'secondary' as const, color: 'text-gray-600' },
+      [ContractStatus.TERMINATED]: { variant: 'destructive' as const, color: 'text-red-600' },
+      [ContractStatus.RENEWED]: { variant: 'default' as const, color: 'text-blue-600' }
+    };
+
+    const config = statusConfig[status] || statusConfig[ContractStatus.DRAFT];
+    return <Badge variant={config.variant}>{status.replace('_', ' ').toUpperCase()}</Badge>;
+  };
+
+  const getSupplierContracts = (supplierId: string) => {
+    return mockContracts.filter(contract => contract.supplierId === supplierId);
   };
 
   const SupplierDetailsDialog = ({ supplier }: { supplier: Supplier }) => (
@@ -135,9 +162,59 @@ const SuppliersPage: React.FC = () => {
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <FileSignature className="w-4 h-4" />
+            Contracts
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {getSupplierContracts(supplier.id).length > 0 ? (
+            <div className="space-y-3">
+              {getSupplierContracts(supplier.id).map((contract) => (
+                <div key={contract.id} className="flex items-center justify-between p-3 border rounded">
+                  <div>
+                    <p className="font-medium">{contract.contractNumber}</p>
+                    <p className="text-sm text-muted-foreground truncate" title={contract.title}>
+                      {contract.title}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(contract.startDate).toLocaleDateString()} - {new Date(contract.endDate).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    {getContractStatusBadge(contract.status)}
+                    <p className="text-sm font-medium mt-1">
+                      {(contract.value / 1000000).toFixed(1)}M {contract.currency}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-6 text-muted-foreground">
+              <FileSignature className="w-8 h-8 mx-auto mb-2 opacity-50" />
+              <p className="text-sm">No contracts found</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <DialogFooter>
         <Button variant="outline" onClick={() => setSelectedSupplier(null)}>
           Close
+        </Button>
+        <Button
+          onClick={() => {
+            setSelectedSupplierForContract(supplier);
+            setIsContractFormOpen(true);
+            setSelectedSupplier(null);
+          }}
+          variant="outline"
+        >
+          <FileSignature className="w-4 h-4 mr-2" />
+          Create Contract
         </Button>
         <Button>
           <Edit className="w-4 h-4 mr-2" />
@@ -154,44 +231,58 @@ const SuppliersPage: React.FC = () => {
           <h1 className="text-3xl font-bold">Suppliers & Farmers</h1>
           <p className="text-muted-foreground">Manage your supplier and farmer network</p>
         </div>
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Add New
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add New Supplier/Farmer</DialogTitle>
-              <DialogDescription>
-                Register a new supplier or farmer in the system
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <label htmlFor="name" className="text-right">Name</label>
-                <Input id="name" className="col-span-3" placeholder="Enter name" />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <label htmlFor="email" className="text-right">Email</label>
-                <Input id="email" type="email" className="col-span-3" placeholder="Enter email" />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <label htmlFor="phone" className="text-right">Phone</label>
-                <Input id="phone" className="col-span-3" placeholder="Enter phone number" />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                Cancel
+        <div className="flex gap-2">
+          <Dialog open={isSurveyFormOpen} onOpenChange={setIsSurveyFormOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <FileText className="w-4 h-4 mr-2" />
+                Survey Form
               </Button>
-              <Button onClick={() => setIsAddDialogOpen(false)}>
-                Add Supplier
+            </DialogTrigger>
+            <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
+              <DialogTitle className="text-xl">Supplier Survey Form</DialogTitle>
+              <SupplierSurveyForm />
+            </DialogContent>
+          </Dialog>
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Add New
               </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add New Supplier/Farmer</DialogTitle>
+                <DialogDescription>
+                  Register a new supplier or farmer in the system
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <label htmlFor="name" className="text-right">Name</label>
+                  <Input id="name" className="col-span-3" placeholder="Enter name" />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <label htmlFor="email" className="text-right">Email</label>
+                  <Input id="email" type="email" className="col-span-3" placeholder="Enter email" />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <label htmlFor="phone" className="text-right">Phone</label>
+                  <Input id="phone" className="col-span-3" placeholder="Enter phone number" />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={() => setIsAddDialogOpen(false)}>
+                  Add Supplier
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <div className="flex gap-4 items-center">
@@ -297,6 +388,23 @@ const SuppliersPage: React.FC = () => {
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedSupplierForContract(supplier);
+                          setIsContractFormOpen(true);
+                        }}
+                      >
+                        <FileSignature className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsSurveyFormOpen(true)}
+                      >
+                        <ClipboardList className="w-4 h-4" />
+                      </Button>
                       <Button variant="outline" size="sm">
                         <Edit className="w-4 h-4" />
                       </Button>
@@ -311,6 +419,26 @@ const SuppliersPage: React.FC = () => {
 
       {selectedSupplier && (
         <SupplierDetailsDialog supplier={selectedSupplier} />
+      )}
+
+      {selectedSupplierForContract && (
+        <Dialog open={isContractFormOpen} onOpenChange={setIsContractFormOpen}>
+          <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
+            <ContractCreationForm
+              supplierId={selectedSupplierForContract.id}
+              supplierName={selectedSupplierForContract.name}
+              onContractCreated={(contract) => {
+                console.log('Contract created:', contract);
+                setIsContractFormOpen(false);
+                setSelectedSupplierForContract(null);
+              }}
+              onCancel={() => {
+                setIsContractFormOpen(false);
+                setSelectedSupplierForContract(null);
+              }}
+            />
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );

@@ -10,7 +10,8 @@ import {
   Truck,
   CheckCircle,
   Menu,
-  X
+  X,
+  FileSignature
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -38,16 +39,24 @@ const navItems: NavItem[] = [
     badge: '12'
   },
   {
-    id: 'field-operations',
-    label: 'Field Operations',
-    icon: <Truck className="w-5 h-5" />,
-    href: '/field-operations'
+    id: 'contracts',
+    label: 'Contracts',
+    icon: <FileSignature className="w-5 h-5" />,
+    href: '/contracts',
+    badge: '3'
   },
   {
     id: 'processing',
     label: 'Processing & QC',
     icon: <Package className="w-5 h-5" />,
-    href: '/processing'
+    href: '/processing',
+    badge: '5'
+  },
+  {
+    id: 'field-operations',
+    label: 'Field Operations',
+    icon: <Truck className="w-5 h-5" />,
+    href: '/field-operations'
   },
   {
     id: 'compliance',
