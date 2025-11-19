@@ -8,6 +8,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { ArrowLeft, Edit, Trash2, FileSignature, MapPin, Mail, Phone, Calendar, TrendingUp, FileText, Camera, AlertTriangle, CheckCircle, Users, Globe, Shield, TreePine } from 'lucide-react';
 import { supplierDb, type SupplierData } from '@/services/supplierDatabase';
 import { formatNumber } from '@/utils/formatters';
+import MapComponent from '@/components/MapComponent';
 
 const SupplierDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -186,6 +187,26 @@ const SupplierDetailPage: React.FC = () => {
               </div>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Location Map */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MapPin className="w-5 h-5" />
+            Location Map
+          </CardTitle>
+          <CardDescription>
+            Visual representation of supplier's plantation location
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <MapComponent
+            address={supplier.plantationAddress}
+            gpsCoordinates={supplier.gpsCoordinate || undefined}
+            className="h-96 w-full"
+          />
         </CardContent>
       </Card>
 
